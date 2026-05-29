@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.zip
+.DS_Store
+*.local
+example_files/
+example_2_files/
+example.html
+example_2.html

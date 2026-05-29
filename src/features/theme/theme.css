@@ -1,0 +1,85 @@
+/**
+ * Переопределение VKUI и IM theme-color токенов.
+ * Значения --vkt-plus-* задаются в apply.ts.
+ */
+html[data-vkt-plus-theme="on"],
+html[data-vkt-plus-theme="on"] body,
+html[data-vkt-plus-theme="on"] body.vkui--paradigmBase--dark,
+html[data-vkt-plus-theme="on"] body.vkui--paradigmBase--light,
+html[data-vkt-plus-theme="on"] .vkui--paradigmBase--dark,
+html[data-vkt-plus-theme="on"] .vkui--paradigmBase--light,
+html[data-vkt-plus-theme="on"] [class*="im-theme-dark"],
+html[data-vkt-plus-theme="on"] [class*="im-theme-light"] {
+  /* IM: поверхности */
+  --theme-color-base_globalwhite: var(--vkt-plus-surface-pinned);
+  --theme-color-base_bright: var(--vkt-plus-surface-message);
+  --theme-color-chat_primary: var(--vkt-plus-surface-menu);
+
+  /* IM: текст */
+  --theme-color-text_solid: var(--vkt-plus-text-primary);
+  --theme-color-text_solid_permanent: var(--vkt-plus-text-primary);
+  --theme-color-base_primary: var(--vkt-plus-text-secondary);
+
+  /* VKUI фоны */
+  --vkui--color_background: var(--vkt-plus-bg);
+  --vkui--color_background_content: var(--vkt-plus-bg);
+  --vkui--color_background_secondary: color-mix(
+    in srgb,
+    var(--vkt-plus-bg) 88%,
+    white
+  );
+  --vkui--color_background_tertiary: color-mix(
+    in srgb,
+    var(--vkt-plus-bg) 82%,
+    white
+  );
+  --vkui--color_field_background: var(--vkt-plus-bg);
+  --vkui--color_header_background: var(--vkt-plus-bg);
+  --vkui--color_write_bar_input_background: color-mix(
+    in srgb,
+    var(--vkt-plus-bg) 90%,
+    white
+  );
+  --vkui-sidebar-bg-color: color-mix(in srgb, var(--vkt-plus-bg) 85%, black);
+  --vkui--color_background_modal: var(--vkt-plus-surface-modal-hex);
+  --vkui--color_background_modal--hover: var(--vkt-plus-surface-modal-hex);
+  --vkui--color_background_modal--active: var(--vkt-plus-surface-modal-hex);
+
+  /* VKUI текст */
+  --vkui--color_text_primary: var(--vkt-plus-text-primary-hex);
+  --vkui--color_text_secondary: var(--vkt-plus-text-secondary-hex);
+  --vkui--color_text_subhead: var(--vkt-plus-text-secondary-hex);
+  --vkui--color_icon_primary: var(--vkt-plus-text-primary-hex);
+  --vkui--color_icon_secondary: var(--vkt-plus-text-secondary-hex);
+  --vkui--color_icon_medium: var(--vkt-plus-text-secondary-hex);
+
+  /* Акцент */
+  --vkui--color_background_accent: var(--vkt-plus-accent);
+  --vkui--color_background_accent--hover: color-mix(
+    in srgb,
+    var(--vkt-plus-accent) 92%,
+    white
+  );
+  --vkui--color_background_accent--active: color-mix(
+    in srgb,
+    var(--vkt-plus-accent) 85%,
+    white
+  );
+  --vkui--color_text_accent: var(--vkt-plus-accent);
+  --vkui--color_icon_accent: var(--vkt-plus-accent);
+  --vkui--color_stroke_accent: var(--vkt-plus-accent);
+  --vkui--color_write_bar_icon: var(--vkt-plus-accent);
+  --vkui--color_text_link: var(--vkt-plus-accent);
+}
+
+html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
+  [class*="MessageBubble"],
+html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
+  [class*="messageBubble"],
+html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
+  [class*="ImMessage"][class*="bubble"],
+html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
+  [class*="im-message"][class*="bubble"] {
+  background: var(--vkt-plus-message-bg) !important;
+  background-color: transparent !important;
+}

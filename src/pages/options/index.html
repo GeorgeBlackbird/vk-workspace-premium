@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VK Teams Plus — Настройки</title>
+    <link rel="stylesheet" href="../shared/styles.css" />
+  </head>
+  <body>
+    <h1>VK Teams Plus</h1>
+    <p class="subtitle">Настройки дополнения</p>
+
+    <section>
+      <h2>Общее</h2>
+      <label class="row">
+        <input type="checkbox" id="global-enabled" checked />
+        Дополнение включено
+      </label>
+    </section>
+
+    <section id="presets-section">
+      <h2>Сохранённые темы</h2>
+      <label>
+        Выбрать тему
+        <select id="preset-select"></select>
+      </label>
+      <div class="btn-row">
+        <button type="button" id="preset-save">Сохранить как…</button>
+        <button type="button" id="preset-update">Обновить выбранную</button>
+        <button type="button" id="preset-delete">Удалить</button>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="preset-export-one">Экспорт темы</button>
+        <button type="button" id="preset-export-all">Экспорт всех</button>
+        <button type="button" id="preset-import">Импорт…</button>
+        <input
+          type="file"
+          id="preset-import-file"
+          accept="application/json,.json"
+          hidden
+        />
+      </div>
+    </section>
+
+    <section id="theme-section">
+      <h2>Редактор темы</h2>
+      <label class="row">
+        <input type="checkbox" id="theme-enabled" />
+        Включить кастомную тему
+      </label>
+      <label>
+        Фон
+        <input type="text" id="theme-background" placeholder="#232324" />
+      </label>
+      <label>
+        Акцентный цвет
+        <input type="color" id="theme-accent-picker" />
+        <input type="text" id="theme-accent" placeholder="#0077ff" />
+      </label>
+
+      <details class="theme-advanced">
+        <summary>Дополнительные цвета</summary>
+        <p class="hint">
+          Пустые поля — авто от основного фона. Для светлой темы задайте светлый
+          фон — текст подстроится сам, либо укажите цвета вручную.
+        </p>
+        <label>
+          Основной текст
+          <input type="text" id="theme-text-primary" placeholder="#ffffff" />
+        </label>
+        <label>
+          Вторичный текст (закреп, подписи)
+          <input type="text" id="theme-text-secondary" placeholder="#9ea1a3" />
+        </label>
+        <label>
+          Закреплённое сообщение
+          <input type="text" id="theme-surface-pinned" placeholder="#212121" />
+        </label>
+        <label>
+          Пузыри сообщений
+          <input
+            type="text"
+            id="theme-surface-message"
+            placeholder="#363636"
+          />
+        </label>
+        <label>
+          Фон пузырей (цвет или gradient)
+          <input
+            type="text"
+            id="theme-message-background"
+            placeholder="linear-gradient(135deg, #2a2a2e, #3d3d42)"
+          />
+        </label>
+        <label>
+          Меню быстрых действий
+          <input type="text" id="theme-surface-menu" placeholder="#2a2a2c" />
+        </label>
+        <label>
+          Контекстное меню / модалки
+          <input type="text" id="theme-surface-modal" placeholder="#303030" />
+        </label>
+      </details>
+
+      <p class="status" id="save-status"></p>
+    </section>
+
+    <p class="subtitle">
+      <a href="#" id="open-teams">Открыть VK Teams</a>
+      · после изменений обновите вкладку мессенджера
+    </p>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
