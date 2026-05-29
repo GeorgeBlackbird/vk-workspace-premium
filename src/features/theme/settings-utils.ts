@@ -1,4 +1,5 @@
 import type { ThemeColorSettings, ThemeSettings } from "./types";
+import { isGradientCss } from "./message-fill";
 
 export function extractColorSettings(
   theme: ThemeSettings,
@@ -8,7 +9,7 @@ export function extractColorSettings(
     activePresetId: _activePresetId,
     ...colors
   } = theme;
-  return colors;
+  return migrateThemeColors(colors);
 }
 
 export function mergeColorSettings(
@@ -17,6 +18,28 @@ export function mergeColorSettings(
 ): ThemeSettings {
   return {
     ...base,
-    ...colors,
+    ...migrateThemeColors(colors),
   };
+}
+
+/** Перенос legacy messageBackground → surfaceMessage / surfaceOutgoing. */
+export function migrateThemeColors(
+  colors: ThemeColorSettings,
+): ThemeColorSettings {
+  const legacy = colors.messageBackground?.trim();
+  if (!legacy) {
+    const { messageBackground: _removed, ...rest } = colors;
+    return rest;
+  }
+
+  const next = { ...colors };
+  if (!next.surfaceMessage?.trim() && !isGradientCss(legacy)) {
+    next.surfaceMessage = legacy;
+  }
+  if (!next.surfaceOutgoing?.trim() && isGradientCss(legacy)) {
+    next.surfaceOutgoing = legacy;
+  }
+
+  delete next.messageBackground;
+  return next;
 }

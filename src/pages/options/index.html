@@ -6,109 +6,323 @@
     <title>VK Teams Plus — Настройки</title>
     <link rel="stylesheet" href="../shared/styles.css" />
   </head>
-  <body>
-    <h1>VK Teams Plus</h1>
-    <p class="subtitle">Настройки дополнения</p>
-
-    <section>
-      <h2>Общее</h2>
-      <label class="row">
+  <body class="options-page">
+    <header class="page-header">
+      <div>
+        <h1>VK Teams Plus</h1>
+        <p class="subtitle">Кастомизация VK WorkSpace и мессенджера</p>
+      </div>
+      <label class="toggle-pill">
         <input type="checkbox" id="global-enabled" checked />
-        Дополнение включено
+        <span>Дополнение включено</span>
       </label>
-    </section>
+    </header>
 
-    <section id="presets-section">
-      <h2>Сохранённые темы</h2>
-      <label>
-        Выбрать тему
-        <select id="preset-select"></select>
-      </label>
-      <div class="btn-row">
-        <button type="button" id="preset-save">Сохранить как…</button>
-        <button type="button" id="preset-update">Обновить выбранную</button>
-        <button type="button" id="preset-delete">Удалить</button>
-      </div>
-      <div class="btn-row">
-        <button type="button" id="preset-export-one">Экспорт темы</button>
-        <button type="button" id="preset-export-all">Экспорт всех</button>
-        <button type="button" id="preset-import">Импорт…</button>
-        <input
-          type="file"
-          id="preset-import-file"
-          accept="application/json,.json"
-          hidden
-        />
-      </div>
-    </section>
-
-    <section id="theme-section">
-      <h2>Редактор темы</h2>
-      <label class="row">
-        <input type="checkbox" id="theme-enabled" />
-        Включить кастомную тему
-      </label>
-      <label>
-        Фон
-        <input type="text" id="theme-background" placeholder="#232324" />
-      </label>
-      <label>
-        Акцентный цвет
-        <input type="color" id="theme-accent-picker" />
-        <input type="text" id="theme-accent" placeholder="#0077ff" />
-      </label>
-
-      <details class="theme-advanced">
-        <summary>Дополнительные цвета</summary>
-        <p class="hint">
-          Пустые поля — авто от основного фона. Для светлой темы задайте светлый
-          фон — текст подстроится сам, либо укажите цвета вручную.
-        </p>
-        <label>
-          Основной текст
-          <input type="text" id="theme-text-primary" placeholder="#ffffff" />
+    <div class="options-layout">
+      <section class="card card--presets" id="presets-section">
+        <div class="card__head">
+          <h2>Сохранённые темы</h2>
+          <p class="card__desc">Переключение, экспорт и обмен JSON с коллегами</p>
+        </div>
+        <label class="field field--full">
+          <span class="field__label">Активная тема</span>
+          <select id="preset-select"></select>
         </label>
-        <label>
-          Вторичный текст (закреп, подписи)
-          <input type="text" id="theme-text-secondary" placeholder="#9ea1a3" />
-        </label>
-        <label>
-          Закреплённое сообщение
-          <input type="text" id="theme-surface-pinned" placeholder="#212121" />
-        </label>
-        <label>
-          Пузыри сообщений
+        <div class="btn-toolbar">
+          <button type="button" class="btn btn--primary" id="preset-save">
+            Сохранить как…
+          </button>
+          <button type="button" class="btn btn--ghost" id="preset-update">
+            Обновить
+          </button>
+          <button type="button" class="btn btn--ghost btn--danger" id="preset-delete">
+            Удалить
+          </button>
+        </div>
+        <div class="btn-toolbar btn-toolbar--compact">
+          <button type="button" class="btn btn--ghost btn--sm" id="preset-export-one">
+            Экспорт темы
+          </button>
+          <button type="button" class="btn btn--ghost btn--sm" id="preset-export-all">
+            Экспорт всех
+          </button>
+          <button type="button" class="btn btn--ghost btn--sm" id="preset-import">
+            Импорт…
+          </button>
           <input
-            type="text"
-            id="theme-surface-message"
-            placeholder="#363636"
+            type="file"
+            id="preset-import-file"
+            accept="application/json,.json"
+            hidden
           />
-        </label>
-        <label>
-          Фон пузырей (цвет или gradient)
-          <input
-            type="text"
-            id="theme-message-background"
-            placeholder="linear-gradient(135deg, #2a2a2e, #3d3d42)"
-          />
-        </label>
-        <label>
-          Меню быстрых действий
-          <input type="text" id="theme-surface-menu" placeholder="#2a2a2c" />
-        </label>
-        <label>
-          Контекстное меню / модалки
-          <input type="text" id="theme-surface-modal" placeholder="#303030" />
-        </label>
-      </details>
+        </div>
+      </section>
 
-      <p class="status" id="save-status"></p>
-    </section>
+      <section class="card card--editor" id="theme-section">
+        <div class="card__head card__head--row">
+          <div>
+            <h2>Редактор темы</h2>
+            <p class="card__desc">
+              Пустые поля в блоках ниже подстраиваются от основного фона
+            </p>
+          </div>
+          <label class="toggle-pill toggle-pill--accent">
+            <input type="checkbox" id="theme-enabled" />
+            <span>Тема активна</span>
+          </label>
+        </div>
 
-    <p class="subtitle">
+        <div class="color-grid color-grid--primary">
+          <div class="color-field" data-color-field="background">
+            <label class="field">
+              <span class="field__label">Основной фон</span>
+              <span class="field__hint">Оболочка, лента, сайдбар VKUI</span>
+            </label>
+            <div class="color-field__row">
+              <input
+                type="color"
+                id="theme-background-picker"
+                aria-label="Основной фон"
+              />
+              <input
+                type="text"
+                id="theme-background"
+                placeholder="#232324"
+                spellcheck="false"
+              />
+            </div>
+          </div>
+
+          <div class="color-field" data-color-field="accent">
+            <label class="field">
+              <span class="field__label">Акцент</span>
+              <span class="field__hint">Ссылки, кнопки, выделения</span>
+            </label>
+            <div class="color-field__row">
+              <input type="color" id="theme-accent-picker" aria-label="Акцент" />
+              <input
+                type="text"
+                id="theme-accent"
+                placeholder="#0077ff"
+                spellcheck="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <fieldset class="theme-group">
+          <legend>Поверхности</legend>
+          <div class="color-grid">
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Фон без чата</span>
+                <span class="field__hint">chat_environment</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-environment-picker"
+                  aria-label="Фон без чата"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-environment"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Закреплённое</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-pinned-picker"
+                  aria-label="Закреплённое"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-pinned"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Ховер / выбранный чип</span>
+                <span class="field__hint">bright_inverse, secondary_selected</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-hover-picker"
+                  aria-label="Ховер"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-hover"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Плашка реакций</span>
+                <span class="field__hint">base_light</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-reactions-picker"
+                  aria-label="Плашка реакций"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-reactions"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field color-field--wide">
+              <label class="field">
+                <span class="field__label">Входящие пузыри</span>
+                <span class="field__hint">#hex или linear-gradient(…)</span>
+              </label>
+              <input
+                type="text"
+                class="input-text--full"
+                id="theme-surface-message"
+                placeholder="#363636 или linear-gradient(135deg, #2a2a2e, #3d3d42)"
+                spellcheck="false"
+              />
+            </div>
+            <div class="color-field color-field--wide">
+              <label class="field">
+                <span class="field__label">Исходящие сообщения</span>
+                <span class="field__hint">#hex или linear-gradient(…)</span>
+              </label>
+              <input
+                type="text"
+                class="input-text--full"
+                id="theme-surface-outgoing"
+                placeholder="авто · linear-gradient(135deg, #5C6CFF, #7D8BFF)"
+                spellcheck="false"
+              />
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Меню действий</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-menu-picker"
+                  aria-label="Меню"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-menu"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Модалки</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-surface-modal-picker"
+                  aria-label="Модалки"
+                />
+                <input
+                  type="text"
+                  id="theme-surface-modal"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="theme-group">
+          <legend>Текст и иконки</legend>
+          <div class="color-grid">
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Основной текст</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-text-primary-picker"
+                  aria-label="Основной текст"
+                />
+                <input
+                  type="text"
+                  id="theme-text-primary"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Вторичный текст</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-text-secondary-picker"
+                  aria-label="Вторичный текст"
+                />
+                <input
+                  type="text"
+                  id="theme-text-secondary"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+            <div class="color-field">
+              <label class="field">
+                <span class="field__label">Иконки сайдбара</span>
+                <span class="field__hint">По умолчанию как основной текст</span>
+              </label>
+              <div class="color-field__row">
+                <input
+                  type="color"
+                  id="theme-icon-primary-picker"
+                  aria-label="Иконки сайдбара"
+                />
+                <input
+                  type="text"
+                  id="theme-icon-primary"
+                  placeholder="авто"
+                  spellcheck="false"
+                />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <p class="status" id="save-status" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+
+    <footer class="page-footer">
       <a href="#" id="open-teams">Открыть VK Teams</a>
-      · после изменений обновите вкладку мессенджера
-    </p>
+      <span class="page-footer__sep">·</span>
+      <span>После изменений обновите вкладку мессенджера</span>
+    </footer>
 
     <script type="module" src="./main.ts"></script>
   </body>

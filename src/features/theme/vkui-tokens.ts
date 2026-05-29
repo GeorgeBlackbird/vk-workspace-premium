@@ -1,5 +1,6 @@
 import type { ThemeSettings } from "./types";
 import { parseBackgroundColor, rgbToHex } from "./color-utils";
+import { resolveIconColors } from "./icon-tokens";
 import { getModalHex } from "./teams-tokens";
 import { resolveTextColors } from "./text-tokens";
 
@@ -33,6 +34,7 @@ const VKUI_VAR_NAMES = Object.values(VKUI_THEME_VARS);
 
 const VKUI_TEXT_VARS = [
   "--vkui--color_text_primary",
+  "--vkui--color_text_contrast",
   "--vkui--color_text_secondary",
   "--vkui--color_text_subhead",
   "--vkui--color_icon_primary",
@@ -45,6 +47,7 @@ export function getVkuiTokenValues(settings: ThemeSettings): Record<string, stri
   const bg = rgbToHex(parseBackgroundColor(settings.background));
   const modal = getModalHex(settings);
   const text = resolveTextColors(settings);
+  const icon = resolveIconColors(settings);
 
   return {
     [VKUI_THEME_VARS.background]: bg,
@@ -60,9 +63,10 @@ export function getVkuiTokenValues(settings: ThemeSettings): Record<string, stri
     "--vkui--color_background_modal--active": modal,
 
     "--vkui--color_text_primary": text.primaryHex,
+    "--vkui--color_text_contrast": text.primaryHex,
     "--vkui--color_text_secondary": text.secondaryHex,
     "--vkui--color_text_subhead": text.secondaryHex,
-    "--vkui--color_icon_primary": text.primaryHex,
+    "--vkui--color_icon_primary": icon.hex,
     "--vkui--color_icon_secondary": text.secondaryHex,
     "--vkui--color_icon_medium": text.secondaryHex,
 

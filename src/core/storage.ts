@@ -1,11 +1,27 @@
 import { DEFAULT_APP_SETTINGS, type AppSettings } from "./types";
 
-const STORAGE_KEY = "appSettings";
+export const STORAGE_KEY = "appSettings";
 
+/**
+ * local — без жёсткого лимита sync (~2 записи/сек), важно при автосохранении в редакторе.
+ * При первом чтении переносим данные из sync, если local пуст.
+ */
 export async function getAppSettings(): Promise<AppSettings> {
-  const result = await chrome.storage.sync.get(STORAGE_KEY);
-  const raw = result[STORAGE_KEY] as Partial<AppSettings> | undefined;
-  return mergeSettings(DEFAULT_APP_SETTINGS, raw);
+  const localResult = await chrome.storage.local.get(STORAGE_KEY);
+  const localRaw = localResult[STORAGE_KEY] as Partial<AppSettings> | undefined;
+  if (localRaw) {
+    return mergeSettings(DEFAULT_APP_SETTINGS, localRaw);
+  }
+
+  const syncResult = await chrome.storage.sync.get(STORAGE_KEY);
+  const syncRaw = syncResult[STORAGE_KEY] as Partial<AppSettings> | undefined;
+  if (syncRaw) {
+    const migrated = mergeSettings(DEFAULT_APP_SETTINGS, syncRaw);
+    await chrome.storage.local.set({ [STORAGE_KEY]: migrated });
+    return migrated;
+  }
+
+  return { ...DEFAULT_APP_SETTINGS };
 }
 
 export async function setAppSettings(
@@ -13,7 +29,7 @@ export async function setAppSettings(
 ): Promise<AppSettings> {
   const current = await getAppSettings();
   const next = mergeSettings(current, patch);
-  await chrome.storage.sync.set({ [STORAGE_KEY]: next });
+  await chrome.storage.local.set({ [STORAGE_KEY]: next });
   return next;
 }
 

@@ -2,15 +2,28 @@
 export interface ThemeColorSettings {
   background: string;
   accent: string;
+  /** Фон приложения при закрытом чате (--theme-color-chat_environment) */
+  surfaceEnvironment?: string;
   surfacePinned?: string;
   surfaceMessage?: string;
+  /** Исходящие сообщения (--theme-color-chat_secondary) */
+  surfaceOutgoing?: string;
   surfaceMenu?: string;
   surfaceModal?: string;
+  /**
+   * Ховер: base_bright_inverse, base_globalwhite_bright_inverse, secondary_selected.
+   */
+  surfaceHover?: string;
+  /** Плашка реакций (--theme-color-base_light) */
+  surfaceReactions?: string;
+  /** @deprecated используйте surfaceMessage / surfaceOutgoing */
   messageBackground?: string;
   /** Основной текст (--theme-color-text_solid). Пусто — авто от яркости фона */
   textPrimary?: string;
   /** Вторичный текст (--theme-color-base_primary). Пусто — авто */
   textSecondary?: string;
+  /** Иконки сайдбара WorkSpace. Пусто — как основной текст */
+  iconPrimary?: string;
 }
 
 export interface ThemePreset {

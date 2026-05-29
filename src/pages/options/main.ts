@@ -9,7 +9,10 @@ import {
   exportPresetFile,
   parseImportFile,
 } from "@/features/theme/presets-io";
-import { extractColorSettings } from "@/features/theme/settings-utils";
+import {
+  extractColorSettings,
+  migrateThemeColors,
+} from "@/features/theme/settings-utils";
 import {
   createPresetId,
   deletePreset,
@@ -46,40 +49,84 @@ const presetImportFile = document.getElementById(
 const themeEnabled = document.getElementById(
   "theme-enabled",
 ) as HTMLInputElement;
-const themeBackground = document.getElementById(
-  "theme-background",
-) as HTMLInputElement;
-const themeAccent = document.getElementById("theme-accent") as HTMLInputElement;
-const themeAccentPicker = document.getElementById(
-  "theme-accent-picker",
-) as HTMLInputElement;
-const themeTextPrimary = document.getElementById(
-  "theme-text-primary",
-) as HTMLInputElement;
-const themeTextSecondary = document.getElementById(
-  "theme-text-secondary",
-) as HTMLInputElement;
-const themeSurfacePinned = document.getElementById(
-  "theme-surface-pinned",
-) as HTMLInputElement;
-const themeSurfaceMessage = document.getElementById(
-  "theme-surface-message",
-) as HTMLInputElement;
-const themeMessageBackground = document.getElementById(
-  "theme-message-background",
-) as HTMLInputElement;
-const themeSurfaceMenu = document.getElementById(
-  "theme-surface-menu",
-) as HTMLInputElement;
-const themeSurfaceModal = document.getElementById(
-  "theme-surface-modal",
-) as HTMLInputElement;
 const saveStatus = document.getElementById("save-status")!;
 const openTeams = document.getElementById("open-teams")!;
 
+interface ColorFieldBinding {
+  text: HTMLInputElement;
+  picker: HTMLInputElement;
+  fallback: string;
+}
+
+const colorFields: ColorFieldBinding[] = [
+  {
+    text: getInput("theme-background"),
+    picker: getInput("theme-background-picker"),
+    fallback: DEFAULT_THEME_SETTINGS.background,
+  },
+  {
+    text: getInput("theme-accent"),
+    picker: getInput("theme-accent-picker"),
+    fallback: DEFAULT_THEME_SETTINGS.accent,
+  },
+  {
+    text: getInput("theme-surface-environment"),
+    picker: getInput("theme-surface-environment-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-surface-pinned"),
+    picker: getInput("theme-surface-pinned-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-surface-hover"),
+    picker: getInput("theme-surface-hover-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-surface-reactions"),
+    picker: getInput("theme-surface-reactions-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-surface-menu"),
+    picker: getInput("theme-surface-menu-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-surface-modal"),
+    picker: getInput("theme-surface-modal-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-text-primary"),
+    picker: getInput("theme-text-primary-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-text-secondary"),
+    picker: getInput("theme-text-secondary-picker"),
+    fallback: "",
+  },
+  {
+    text: getInput("theme-icon-primary"),
+    picker: getInput("theme-icon-primary-picker"),
+    fallback: "",
+  },
+];
+
+const themeSurfaceMessage = getInput("theme-surface-message");
+const themeSurfaceOutgoing = getInput("theme-surface-outgoing");
+
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+let persistTimer: ReturnType<typeof setTimeout> | undefined;
 let activePresetId: string | null = null;
 let suppressPresetSelect = false;
+
+function getInput(id: string): HTMLInputElement {
+  return document.getElementById(id) as HTMLInputElement;
+}
 
 function showStatus(text: string): void {
   saveStatus.textContent = text;
@@ -94,18 +141,51 @@ function optionalField(value: string): string | undefined {
   return trimmed || undefined;
 }
 
+function normalizeHex(color: string, fallback: string): string {
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color;
+  if (/^#[0-9a-f]{6}$/i.test(fallback)) return fallback;
+  return "#232324";
+}
+
+function syncPickerFromText(binding: ColorFieldBinding): void {
+  const raw = binding.text.value.trim();
+  if (/^#[0-9a-f]{6}$/i.test(raw)) {
+    binding.picker.value = raw;
+    return;
+  }
+  if (!raw && !binding.fallback) return;
+  if (binding.fallback) {
+    binding.picker.value = normalizeHex(binding.fallback, binding.fallback);
+  }
+}
+
+function syncTextFromPicker(binding: ColorFieldBinding): void {
+  binding.text.value = binding.picker.value;
+}
+
+function fillColorField(binding: ColorFieldBinding, value: string | undefined): void {
+  binding.text.value = value ?? "";
+  syncPickerFromText(binding);
+}
+
 function readColorsFromForm(): ThemeColorSettings {
   return {
     background:
-      themeBackground.value.trim() || DEFAULT_THEME_SETTINGS.background,
-    accent: themeAccent.value.trim() || DEFAULT_THEME_SETTINGS.accent,
-    textPrimary: optionalField(themeTextPrimary.value),
-    textSecondary: optionalField(themeTextSecondary.value),
-    surfacePinned: optionalField(themeSurfacePinned.value),
+      getInput("theme-background").value.trim() ||
+      DEFAULT_THEME_SETTINGS.background,
+    accent:
+      getInput("theme-accent").value.trim() || DEFAULT_THEME_SETTINGS.accent,
+    surfaceEnvironment: optionalField(getInput("theme-surface-environment").value),
+    surfacePinned: optionalField(getInput("theme-surface-pinned").value),
+    surfaceHover: optionalField(getInput("theme-surface-hover").value),
+    surfaceReactions: optionalField(getInput("theme-surface-reactions").value),
     surfaceMessage: optionalField(themeSurfaceMessage.value),
-    messageBackground: optionalField(themeMessageBackground.value),
-    surfaceMenu: optionalField(themeSurfaceMenu.value),
-    surfaceModal: optionalField(themeSurfaceModal.value),
+    surfaceOutgoing: optionalField(themeSurfaceOutgoing.value),
+    surfaceMenu: optionalField(getInput("theme-surface-menu").value),
+    surfaceModal: optionalField(getInput("theme-surface-modal").value),
+    textPrimary: optionalField(getInput("theme-text-primary").value),
+    textSecondary: optionalField(getInput("theme-text-secondary").value),
+    iconPrimary: optionalField(getInput("theme-icon-primary").value),
   };
 }
 
@@ -113,21 +193,24 @@ function readThemeFromForm(): ThemeSettings {
   return {
     enabled: themeEnabled.checked,
     activePresetId,
-    ...readColorsFromForm(),
+    ...migrateThemeColors(readColorsFromForm()),
   };
 }
 
 function fillFormFromColors(colors: ThemeColorSettings): void {
-  themeBackground.value = colors.background;
-  themeAccent.value = colors.accent;
-  themeAccentPicker.value = normalizeHex(colors.accent);
-  themeTextPrimary.value = colors.textPrimary ?? "";
-  themeTextSecondary.value = colors.textSecondary ?? "";
-  themeSurfacePinned.value = colors.surfacePinned ?? "";
+  fillColorField(colorFields[0]!, colors.background);
+  fillColorField(colorFields[1]!, colors.accent);
+  fillColorField(colorFields[2]!, colors.surfaceEnvironment);
+  fillColorField(colorFields[3]!, colors.surfacePinned);
+  fillColorField(colorFields[4]!, colors.surfaceHover);
+  fillColorField(colorFields[5]!, colors.surfaceReactions);
   themeSurfaceMessage.value = colors.surfaceMessage ?? "";
-  themeMessageBackground.value = colors.messageBackground ?? "";
-  themeSurfaceMenu.value = colors.surfaceMenu ?? "";
-  themeSurfaceModal.value = colors.surfaceModal ?? "";
+  themeSurfaceOutgoing.value = colors.surfaceOutgoing ?? "";
+  fillColorField(colorFields[6]!, colors.surfaceMenu);
+  fillColorField(colorFields[7]!, colors.surfaceModal);
+  fillColorField(colorFields[8]!, colors.textPrimary);
+  fillColorField(colorFields[9]!, colors.textSecondary);
+  fillColorField(colorFields[10]!, colors.iconPrimary);
 }
 
 async function notifyTabs(): Promise<void> {
@@ -141,11 +224,18 @@ async function notifyTabs(): Promise<void> {
   }
 }
 
-async function persist(): Promise<void> {
+async function persistNow(): Promise<void> {
   await setAppSettings({ enabled: globalEnabled.checked });
   await setFeatureSettings("theme", readThemeFromForm());
   await notifyTabs();
   showStatus("Сохранено");
+}
+
+function schedulePersist(): void {
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    void persistNow();
+  }, 400);
 }
 
 async function refreshPresetSelect(): Promise<ThemePreset[]> {
@@ -171,7 +261,7 @@ async function refreshPresetSelect(): Promise<ThemePreset[]> {
       ? activePresetId
       : current && presets.some((p) => p.id === current)
         ? current
-        : activePresetId ?? "";
+        : (activePresetId ?? "");
   suppressPresetSelect = false;
 
   return presets;
@@ -181,7 +271,7 @@ async function applyPreset(preset: ThemePreset): Promise<void> {
   activePresetId = preset.id;
   fillFormFromColors(preset.settings);
   themeEnabled.checked = true;
-  await persist();
+  await persistNow();
   await refreshPresetSelect();
   showStatus(`Тема «${preset.name}» применена`);
 }
@@ -200,14 +290,20 @@ async function load(): Promise<void> {
   await refreshPresetSelect();
 }
 
-function normalizeHex(color: string): string {
-  if (/^#[0-9a-f]{6}$/i.test(color)) return color;
-  return "#7aa2f7";
+function bindColorField(binding: ColorFieldBinding): void {
+  binding.picker.addEventListener("input", () => {
+    syncTextFromPicker(binding);
+    schedulePersist();
+  });
+  binding.text.addEventListener("input", () => {
+    syncPickerFromText(binding);
+    schedulePersist();
+  });
+  binding.text.addEventListener("change", () => void persistNow());
 }
 
 function bindAutoSave(element: HTMLElement): void {
-  element.addEventListener("change", () => void persist());
-  element.addEventListener("input", () => void persist());
+  element.addEventListener("change", () => void persistNow());
 }
 
 openTeams.addEventListener("click", (e) => {
@@ -215,23 +311,12 @@ openTeams.addEventListener("click", (e) => {
   void chrome.tabs.create({ url: "https://app.workspace.vk.ru/messenger" });
 });
 
-themeAccentPicker.addEventListener("input", () => {
-  themeAccent.value = themeAccentPicker.value;
-  void persist();
-});
-
-themeAccent.addEventListener("input", () => {
-  if (/^#[0-9a-f]{6}$/i.test(themeAccent.value)) {
-    themeAccentPicker.value = themeAccent.value;
-  }
-});
-
 presetSelect.addEventListener("change", () => {
   if (suppressPresetSelect) return;
   const id = presetSelect.value;
   if (!id) {
     activePresetId = null;
-    void persist();
+    void persistNow();
     return;
   }
   void getPresetById(id).then((preset) => {
@@ -245,7 +330,7 @@ presetSave.addEventListener("click", () => {
   const preset = presetFromColors(name.trim(), readColorsFromForm());
   void upsertPreset(preset).then(async () => {
     activePresetId = preset.id;
-    await persist();
+    await persistNow();
     await refreshPresetSelect();
     showStatus(`Тема «${preset.name}» сохранена`);
   });
@@ -265,7 +350,7 @@ presetUpdate.addEventListener("click", () => {
     };
     await upsertPreset(updated);
     activePresetId = id;
-    await persist();
+    await persistNow();
     showStatus(`Тема «${existing.name}» обновлена`);
   });
 });
@@ -281,7 +366,7 @@ presetDelete.addEventListener("click", () => {
     if (!window.confirm(`Удалить тему «${preset.name}»?`)) return;
     await deletePreset(id);
     if (activePresetId === id) activePresetId = null;
-    await persist();
+    await persistNow();
     await refreshPresetSelect();
     showStatus("Тема удалена");
   });
@@ -292,10 +377,7 @@ presetExportOne.addEventListener("click", () => {
   if (id) {
     void getPresetById(id).then((preset) => {
       if (!preset) return;
-      downloadJson(
-        `${slugify(preset.name)}.json`,
-        exportPresetFile(preset),
-      );
+      downloadJson(`${slugify(preset.name)}.json`, exportPresetFile(preset));
       showStatus("Файл темы скачан");
     });
     return;
@@ -349,16 +431,18 @@ function slugify(name: string): string {
   );
 }
 
+for (const binding of colorFields) {
+  bindColorField(binding);
+}
+
 bindAutoSave(globalEnabled);
 bindAutoSave(themeEnabled);
-bindAutoSave(themeBackground);
-bindAutoSave(themeAccent);
-bindAutoSave(themeTextPrimary);
-bindAutoSave(themeTextSecondary);
-bindAutoSave(themeSurfacePinned);
-bindAutoSave(themeSurfaceMessage);
-bindAutoSave(themeMessageBackground);
-bindAutoSave(themeSurfaceMenu);
-bindAutoSave(themeSurfaceModal);
+function bindTextField(element: HTMLInputElement): void {
+  element.addEventListener("input", () => schedulePersist());
+  element.addEventListener("change", () => void persistNow());
+}
+
+bindTextField(themeSurfaceMessage);
+bindTextField(themeSurfaceOutgoing);
 
 void load();

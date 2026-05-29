@@ -1,5 +1,5 @@
 import { bootstrapFeatures, destroyFeatures } from "@/core/feature-registry";
-import { getAppSettings } from "@/core/storage";
+import { getAppSettings, STORAGE_KEY } from "@/core/storage";
 import type { AppSettings, FeatureContext } from "@/core/types";
 
 // Подключаем фичи через side-effect import
@@ -65,8 +65,9 @@ async function main(): Promise<void> {
 }
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== "sync" || !changes.appSettings) return;
-  const next = changes.appSettings.newValue as AppSettings | undefined;
+  if (areaName !== "local" && areaName !== "sync") return;
+  if (!changes[STORAGE_KEY]) return;
+  const next = changes[STORAGE_KEY].newValue as AppSettings | undefined;
   if (next) notifySettingsListeners(next);
 });
 
@@ -81,6 +82,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
 void main();
 
-window.addEventListener("pagehide", () => {
+window.addEventListener("pagehide", (event) => {
+  // Не снимаем тему при уходе во вкладку bfcache — иначе после возврата тема пропадает
+  if (event.persisted) return;
   destroyFeatures();
+});
+
+window.addEventListener("pageshow", (event) => {
+  if (!event.persisted) return;
+  void getAppSettings().then(notifySettingsListeners);
 });

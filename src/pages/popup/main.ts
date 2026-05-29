@@ -10,7 +10,9 @@ import {
 const versionEl = document.getElementById("version")!;
 const statusEl = document.getElementById("status")!;
 const openOptions = document.getElementById("open-options")!;
-const presetSelect = document.getElementById("preset-select") as HTMLSelectElement;
+const presetSelect = document.getElementById(
+  "preset-select",
+) as HTMLSelectElement;
 
 versionEl.textContent = `v${chrome.runtime.getManifest().version}`;
 
@@ -46,7 +48,10 @@ async function loadPresets(): Promise<void> {
     presetSelect.appendChild(option);
   }
 
-  if (theme.activePresetId && presets.some((p) => p.id === theme.activePresetId)) {
+  if (
+    theme.activePresetId &&
+    presets.some((p) => p.id === theme.activePresetId)
+  ) {
     presetSelect.value = theme.activePresetId;
   } else if (presets[0]) {
     presetSelect.value = presets[0].id;

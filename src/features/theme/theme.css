@@ -11,9 +11,21 @@ html[data-vkt-plus-theme="on"] .vkui--paradigmBase--light,
 html[data-vkt-plus-theme="on"] [class*="im-theme-dark"],
 html[data-vkt-plus-theme="on"] [class*="im-theme-light"] {
   /* IM: поверхности */
+  --theme-color-chat_environment: var(--vkt-plus-surface-environment);
   --theme-color-base_globalwhite: var(--vkt-plus-surface-pinned);
+  --theme-color-base_globalwhite_bright_inverse: var(--vkt-plus-surface-hover);
   --theme-color-base_bright: var(--vkt-plus-surface-message);
+  --theme-color-base_bright_inverse: var(--vkt-plus-surface-hover);
+  --theme-color-base_bright_inverse_hover: var(--vkt-plus-surface-hover-search);
+  --theme-color-base_bright_hover: var(--vkt-plus-surface-message-hover);
+  --theme-color-chat_secondary: var(--vkt-plus-surface-outgoing);
+  --theme-color-primary_selected: var(--vkt-plus-surface-primary-selected);
+  --theme-color-base_bright_active: var(--vkt-plus-surface-message-active);
+  --theme-color-base_light: var(--vkt-plus-surface-reactions);
+  --theme-color-secondary_selected: var(--vkt-plus-surface-hover);
   --theme-color-chat_primary: var(--vkt-plus-surface-menu);
+  --theme-color-chat_primary_hover: var(--vkt-plus-surface-menu-hover);
+  --theme-color-chat_primary_active: var(--vkt-plus-surface-menu-active);
 
   /* IM: текст */
   --theme-color-text_solid: var(--vkt-plus-text-primary);
@@ -47,9 +59,10 @@ html[data-vkt-plus-theme="on"] [class*="im-theme-light"] {
 
   /* VKUI текст */
   --vkui--color_text_primary: var(--vkt-plus-text-primary-hex);
+  --vkui--color_text_contrast: var(--vkt-plus-text-primary-hex);
   --vkui--color_text_secondary: var(--vkt-plus-text-secondary-hex);
   --vkui--color_text_subhead: var(--vkt-plus-text-secondary-hex);
-  --vkui--color_icon_primary: var(--vkt-plus-text-primary-hex);
+  --vkui--color_icon_primary: var(--vkt-plus-icon-primary-hex);
   --vkui--color_icon_secondary: var(--vkt-plus-text-secondary-hex);
   --vkui--color_icon_medium: var(--vkt-plus-text-secondary-hex);
 
@@ -72,14 +85,31 @@ html[data-vkt-plus-theme="on"] [class*="im-theme-light"] {
   --vkui--color_text_link: var(--vkt-plus-accent);
 }
 
-html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
-  [class*="MessageBubble"],
-html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
-  [class*="messageBubble"],
-html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
-  [class*="ImMessage"][class*="bubble"],
-html[data-vkt-plus-theme="on"][data-vkt-plus-message-gradient="on"]
-  [class*="im-message"][class*="bubble"] {
-  background: var(--vkt-plus-message-bg) !important;
-  background-color: transparent !important;
+/* WorkSpace / VKUI: иконки с захардкоженным белым fill или mask */
+html[data-vkt-plus-theme="on"] #__WS_SA_ROOT__ svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] #root svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] aside svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] nav svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="SideMenu"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="LeftPanel"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="NavigationTab"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="AppNav"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="WorkspaceNav"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="Dock"] svg [fill]:not([fill="none"]),
+html[data-vkt-plus-theme="on"] [class*="MainNav"] svg [fill]:not([fill="none"]) {
+  fill: var(--vkt-plus-icon-primary-hex) !important;
+}
+
+html[data-vkt-plus-theme="on"] #__WS_SA_ROOT__ svg [stroke]:not([stroke="none"]),
+html[data-vkt-plus-theme="on"] #root svg [stroke]:not([stroke="none"]),
+html[data-vkt-plus-theme="on"] aside svg [stroke]:not([stroke="none"]),
+html[data-vkt-plus-theme="on"] nav svg [stroke]:not([stroke="none"]) {
+  stroke: var(--vkt-plus-icon-primary-hex) !important;
+}
+
+html[data-vkt-plus-theme="on"] #__WS_SA_ROOT__ [class*="Icon"] [style*="mask"],
+html[data-vkt-plus-theme="on"] #root [class*="Icon"] [style*="mask"],
+html[data-vkt-plus-theme="on"] #__WS_SA_ROOT__ [class*="icon"] [style*="background"],
+html[data-vkt-plus-theme="on"] #root [class*="Avatar"] [style*="background-color"] {
+  background-color: var(--vkt-plus-icon-primary-hex) !important;
 }
