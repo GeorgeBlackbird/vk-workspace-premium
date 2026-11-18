@@ -1,68 +1,87 @@
 # VK Teams Plus
 
-Расширяемое Chrome-дополнение для [VK Teams](https://teams.vk.com/) с модульной архитектурой фич.
+An unofficial browser extension for customising the web version of VK Workspace and its VK Teams messenger. Built with TypeScript for Chromium-based browsers.
 
-## Быстрый старт
+My colleagues and I used it to experiment with the interface and share custom themes. Keeping it working meant chasing changes in VK's page structure and internal styles. Updates repeatedly broke the overrides, and I am no longer maintaining the extension. I am keeping the source for history and do not plan to return to it.
 
-```bash
-cd vk-teams-plus
-npm install
-npm run icons
+The repository is named `vk-workspace-premium`; the extension appears in the browser as **VK Teams Plus**.
+
+## What is included
+
+- Custom background and accent colours, with overrides for text, icons, message bubbles, menus and other surfaces.
+- Named theme presets, including built-in light and dark examples.
+- JSON import and export for sharing individual themes or a collection.
+- A popup for switching presets and an options page for editing them.
+
+The content script applies styles to the Workspace shell and the messenger inside its frames. Settings and presets are stored using `chrome.storage.local`; the settings code also migrates older values from `chrome.storage.sync`.
+
+## Compatibility and maintenance
+
+This extension relies on internal VKUI and messenger CSS variables, class names and DOM selectors. These are not a stable extension API. The implementation includes delayed reapplication and a `MutationObserver` to handle changes within the page, but those mechanisms cannot keep selectors or tokens compatible with a redesigned interface.
+
+Compatibility with the current VK Workspace has not been verified. Treat the code as a historical experiment rather than a supported customisation tool. No fixes or further releases are planned.
+
+## Build and load locally
+
+Use Node.js compatible with the locked Vite dependencies and npm.
+
+```sh
+git clone https://github.com/GeorgeBlackbird/vk-workspace-premium.git
+cd vk-workspace-premium
+npm ci
 npm run build
 ```
 
-Загрузка в Chrome: `chrome://extensions` → «Режим разработчика» → «Загрузить распакованное» → папка `dist/`.
+To load the built extension in Chrome:
 
-При разработке:
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select this repository's `dist/` directory.
+4. Open the extension's popup or options page to inspect the theme controls.
 
-```bash
+Other Chromium-based browsers have their own extension-management page. The manifest targets the hosted VK domains listed below; self-hosted installations on other domains require manifest changes.
+
+For a watch build:
+
+```sh
 npm run dev
 ```
 
-После каждой пересборки нажмите «Обновить» на карточке расширения и перезагрузите вкладку VK Teams.
+After rebuilding, reload the extension from the browser's extension-management page and reload the VK Workspace tab.
 
-## Архитектура
+Icons are included in [`public/icons`](public/icons). The existing `npm run icons` script regenerates them.
 
-```
-src/
-  core/           # storage, registry, messaging, типы
-  content/        # точка входа на странице Teams
-  background/     # service worker
-  features/       # одна папка = одна фича
-    theme/        # первая фича (фон + акцент)
-    _template/    # шаблон для новых фич
-  pages/          # options + popup
-```
+## Permissions and target pages
 
-**Новая фича:** скопируйте `src/features/_template/`, реализуйте `init`, добавьте в `src/content/index.ts`:
+The Manifest V3 configuration requests the `storage` permission for settings and presets, plus access to these host patterns:
 
-```ts
-import "@/features/my-feature";
+```text
+https://app.workspace.vk.ru/*
+https://*.workspace.vk.ru/*
+https://myteam.mail.ru/*
+https://*.myteam.mail.ru/*
 ```
 
-## Домены
+The content script runs at `document_start` in matching frames, including the messenger iframe. See [`manifest.config.ts`](manifest.config.ts) for the actual configuration.
 
-- Оболочка: `https://app.workspace.vk.ru/*`
-- Мессенджер (iframe): `https://myteam.mail.ru/*`
+## Source layout
 
-Content script запускается во всех фреймах (`all_frames`). Для on-prem добавьте свои хосты в `manifest.config.ts`.
+| Path | Purpose |
+| --- | --- |
+| [`src/content`](src/content) | Content-script startup and settings-change listeners |
+| [`src/background`](src/background) | Extension service worker |
+| [`src/core`](src/core) | Settings, messaging and feature registration |
+| [`src/features/theme`](src/features/theme) | Theme application, tokens, selectors and presets |
+| [`src/pages/options`](src/pages/options) | Theme editor and preset import/export |
+| [`src/pages/popup`](src/pages/popup) | Preset switching and extension status |
 
-## Тема
+The feature registry separates the shared extension setup from the theme implementation. [`src/features/_template`](src/features/_template) is the original starting point for adding a feature; no new features are planned.
 
-Переопределяет VKUI- и IM-токены (`--vkui--*`, `--theme-color-*`) на WorkSpace и в iframe мессенджера: фоны (включая фон без открытого чата), текст, иконки сайдбара, ховеры, пузыри, меню, модалки.
+## Checks
 
-- **Настройки** → раздел «Сохранённые темы»: несколько пресетов, экспорт/импорт JSON для обмена с коллегами.
-- **Попап** расширения: быстрое переключение между сохранёнными темами.
-- **Светлая тема**: задайте светлый фон (`#f0f2f5`) — основной и вторичный текст подстроятся автоматически, либо укажите в «Дополнительные цвета».
-- Встроенные пресеты: «Тёмная (VK Teams)» и «Светлая (пример)».
-
-Формат экспорта одной темы: `{ "type": "vk-teams-plus-theme", "settings": { ... } }`. Нескольких: `{ "type": "vk-teams-plus-themes", "presets": [ ... ] }`.
-
-После изменений обновите вкладку мессенджера.
-
-## Сборка релиза
-
-```bash
+```sh
+npm run typecheck
 npm run build
-# Упакуйте папку dist/ в zip для публикации или распространения внутри компании
 ```
+
+The build also runs the TypeScript check. There is no configured lint command or automated test suite. A successful build does not establish that the theme overrides still work against VK's current interface.
